@@ -1,4 +1,5 @@
 "use client";
+import AdUnit from "@/components/AdUnit"
 import { useState, useCallback } from "react";
 
 const CHARS = { upper: "ABCDEFGHIJKLMNOPQRSTUVWXYZ", lower: "abcdefghijklmnopqrstuvwxyz", numbers: "0123456789", symbols: "!@#$%^&*()-_=+[]{}|;:,.<>?" };
