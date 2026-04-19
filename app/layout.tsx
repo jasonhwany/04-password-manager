@@ -10,13 +10,11 @@ export const metadata: Metadata = {
     default: "비밀번호 생성기 — MoneyStom7",
     template: "%s | MoneyStom7",
   },
-  description: "강력하고 안전한 비밀번호를 무료로 생성. 특수문자·숫자·대소문자 조합. Free strong password generator. Create secure random passwords with custom length and character options.",
-  keywords: ["비밀번호 생성기", "Password Generator", "무료", "온라인", "계산기", "password generator", "strong password", "secure password", "random password"],
-  authors: [{ name: "MoneyStom7" }],
+  description: "강력하고 안전한 비밀번호를 무료로 생성. Free strong password generator.",
   alternates: { canonical: "/" },
   openGraph: {
     title: "비밀번호 생성기 — MoneyStom7",
-    description: "강력하고 안전한 비밀번호를 무료로 생성. 특수문자·숫자·대소문자 조합.",
+    description: "강력하고 안전한 비밀번호를 무료로 생성. Free strong password generator.",
     url: BASE_URL,
     siteName: "MoneyStom7",
     locale: "ko_KR",
@@ -25,7 +23,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "비밀번호 생성기 — MoneyStom7",
-    description: "강력하고 안전한 비밀번호를 무료로 생성. 특수문자·숫자·대소문자 조합.",
+    description: "강력하고 안전한 비밀번호를 무료로 생성. Free strong password generator.",
   },
   robots: {
     index: true,
@@ -39,6 +37,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ko">
       <body>
         {children}
+        <Script
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=G-GN51TN6PS4"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-GN51TN6PS4');
+          `}
+        </Script>
         <Script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8414331859152952"
