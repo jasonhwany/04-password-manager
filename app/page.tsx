@@ -1,7 +1,5 @@
-"use client";
-import AdUnit from "@/components/AdUnit"
-
-import Script from "next/script"
+import PasswordGeneratorClient from "@/components/PasswordGeneratorClient";
+import Script from "next/script";
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -13,121 +11,55 @@ const jsonLd = {
   operatingSystem: "Any",
   offers: { "@type": "Offer", price: "0", priceCurrency: "KRW" },
   inLanguage: ["ko", "en"],
-}
-import { useState, useCallback } from "react";
+};
 
-const CHARS = { upper: "ABCDEFGHIJKLMNOPQRSTUVWXYZ", lower: "abcdefghijklmnopqrstuvwxyz", numbers: "0123456789", symbols: "!@#$%^&*()-_=+[]{}|;:,.<>?" };
-const LABEL = { upper: "대문자 A-Z", lower: "소문자 a-z", numbers: "숫자 0-9", symbols: "특수문자 !@#" };
-
-export default function PasswordGenerator() {
-  const [length, setLength] = useState(16);
-  const [opts, setOpts] = useState({ upper: true, lower: true, numbers: true, symbols: false });
-  const [count, setCount] = useState(1);
-  const [pws, setPws] = useState<string[]>([]);
-  const [copied, setCopied] = useState<number | null>(null);
-
-  const gen = useCallback(() => {
-    let cs = "";
-    if (opts.upper) cs += CHARS.upper;
-    if (opts.lower) cs += CHARS.lower;
-    if (opts.numbers) cs += CHARS.numbers;
-    if (opts.symbols) cs += CHARS.symbols;
-    if (!cs) return;
-    const result: string[] = [];
-    for (let i = 0; i < count; i++) {
-      const arr = new Uint32Array(length);
-      crypto.getRandomValues(arr);
-      result.push(Array.from(arr).map(n => cs[n % cs.length]).join(""));
-    }
-    setPws(result);
-  }, [length, opts, count]);
-
-  const copy = (pw: string, idx: number) => {
-    navigator.clipboard.writeText(pw);
-    setCopied(idx);
-    setTimeout(() => setCopied(null), 1500);
-  };
-
-  const strength = (pw: string) => {
-    if (!pw) return null;
-    const s = [/[A-Z]/, /[a-z]/, /[0-9]/, /[^A-Za-z0-9]/].filter(r => r.test(pw)).length + (pw.length >= 16 ? 1 : 0);
-    return s <= 2 ? { label: "약함", color: "bg-red-500", pct: "25%" }
-      : s <= 3 ? { label: "보통", color: "bg-yellow-500", pct: "50%" }
-      : s <= 4 ? { label: "강함", color: "bg-blue-500", pct: "75%" }
-      : { label: "매우 강함", color: "bg-emerald-500", pct: "100%" };
-  };
-
+export default function Page() {
   return (
     <div className="min-h-screen bg-gray-950 text-white p-4 font-sans">
-      <div className="max-w-lg mx-auto pt-10">
-        <div className="text-center mb-8">
-          <div className="text-5xl mb-3">🔐</div>
-          <h1 className="text-3xl font-bold tracking-tight">비밀번호 생성기</h1>
-          <p className="text-gray-400 mt-1 text-sm">Password Generator</p>
+      <Script id="json-ld" type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+
+      <PasswordGeneratorClient />
+
+      <section className="max-w-lg mx-auto mt-16 space-y-10 text-sm text-gray-400 pb-16">
+        <div>
+          <h2 className="text-white text-base font-semibold mb-3">비밀번호 생성기란?</h2>
+          <p>
+            비밀번호 생성기(Password Generator)는 대문자, 소문자, 숫자, 특수문자를 조합하여
+            해킹하기 어려운 강력한 랜덤 비밀번호를 무료로 생성하는 도구입니다.
+            길이 6자부터 64자까지 설정 가능하며, 최대 20개의 비밀번호를 한 번에 생성할 수 있습니다.
+            모든 처리는 브라우저에서만 이루어지므로 생성된 비밀번호가 서버에 저장되지 않습니다.
+          </p>
         </div>
 
-        <div className="bg-gray-900 rounded-2xl p-6 space-y-5">
-          <div>
-            <label className="flex justify-between text-sm mb-2">
-              <span>비밀번호 길이</span>
-              <span className="text-emerald-400 font-mono font-bold">{length}자</span>
-            </label>
-            <input type="range" min="6" max="64" value={length} onChange={e => setLength(+e.target.value)} className="w-full accent-emerald-500" />
-            <div className="flex justify-between text-xs text-gray-600 mt-0.5"><span>6</span><span>64</span></div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-2">
-            {(Object.keys(opts) as (keyof typeof opts)[]).map(k => (
-              <label key={k} className={`flex items-center gap-2.5 p-3 rounded-xl border cursor-pointer transition-all ${opts[k] ? "border-emerald-500 bg-emerald-500/10" : "border-gray-700 hover:border-gray-600"}`}>
-                <input type="checkbox" checked={opts[k]} onChange={() => setOpts(o => ({ ...o, [k]: !o[k] }))} className="w-4 h-4 accent-emerald-500" />
-                <span className="text-sm">{LABEL[k]}</span>
-              </label>
-            ))}
-          </div>
-
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-400 whitespace-nowrap">생성 개수</span>
-            <input type="number" min="1" max="20" value={count} onChange={e => setCount(Math.min(20, Math.max(1, +e.target.value)))}
-              className="w-20 bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-emerald-500" />
-          </div>
-
-          <button onClick={gen}
-            className="w-full bg-emerald-500 hover:bg-emerald-400 text-white font-semibold py-3 rounded-xl transition-colors">
-            비밀번호 생성
-          </button>
+        <div>
+          <h2 className="text-white text-base font-semibold mb-3">강력한 비밀번호 만드는 방법</h2>
+          <ul className="space-y-2 list-disc list-inside">
+            <li><strong className="text-gray-300">길이</strong> — 최소 16자 이상을 권장합니다. 길수록 안전합니다.</li>
+            <li><strong className="text-gray-300">복잡성</strong> — 대문자, 소문자, 숫자, 특수문자를 모두 포함하세요.</li>
+            <li><strong className="text-gray-300">고유성</strong> — 사이트마다 다른 비밀번호를 사용하세요.</li>
+            <li><strong className="text-gray-300">관리</strong> — 생성된 비밀번호는 안전한 비밀번호 관리자에 저장하세요.</li>
+          </ul>
         </div>
 
-        {pws.length > 0 && (
-          <div className="mt-4 bg-gray-900 rounded-2xl p-5 space-y-2.5">
-            {pws.map((pw, i) => {
-              const s = strength(pw);
-              return (
-                <div key={i} className="space-y-1.5">
-                  <div className="flex items-center gap-2 bg-gray-800 rounded-xl px-4 py-3">
-                    <span className="flex-1 font-mono text-sm break-all leading-relaxed">{pw}</span>
-                    <button onClick={() => copy(pw, i)}
-                      className="text-xs bg-gray-700 hover:bg-gray-600 px-3 py-1.5 rounded-lg whitespace-nowrap transition-colors">
-                      {copied === i ? "✓" : "복사"}
-                    </button>
-                  </div>
-                  {s && (
-                    <div className="flex items-center gap-2 px-1">
-                      <div className="flex-1 h-1 bg-gray-700 rounded-full overflow-hidden">
-                        <div className={`h-full rounded-full transition-all ${s.color}`} style={{ width: s.pct }} />
-                      </div>
-                      <span className="text-xs text-gray-400 w-16 text-right">{s.label}</span>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        <p className="text-center text-xs text-gray-600 mt-10">
-          <a href="https://moneystom7.com" className="hover:text-gray-400 transition-colors">← MoneyStom7 홈으로</a>
-        </p>
-      </div>
+        <div>
+          <h2 className="text-white text-base font-semibold mb-3">자주 묻는 질문 (FAQ)</h2>
+          <dl className="space-y-4">
+            <div>
+              <dt className="text-gray-300 font-medium">생성된 비밀번호가 서버에 저장되나요?</dt>
+              <dd className="mt-1">아니요. 모든 비밀번호 생성은 사용자의 브라우저 내 JavaScript로만 처리됩니다. 생성된 비밀번호는 서버로 전송되지 않으며 완전히 안전합니다.</dd>
+            </div>
+            <div>
+              <dt className="text-gray-300 font-medium">특수문자가 포함된 비밀번호가 항상 좋은가요?</dt>
+              <dd className="mt-1">대부분의 경우 특수문자 포함이 보안에 유리하지만, 일부 사이트는 특정 특수문자를 허용하지 않습니다. 특수문자를 포함한 후 해당 사이트에서 허용하는지 확인하세요.</dd>
+            </div>
+            <div>
+              <dt className="text-gray-300 font-medium">몇 자리 비밀번호가 안전한가요?</dt>
+              <dd className="mt-1">현재 보안 권고에 따르면 최소 12자 이상, 중요한 계정은 16~20자를 권장합니다. 대소문자+숫자+특수문자 조합의 16자 비밀번호는 현재 컴퓨팅 기술로 해독이 사실상 불가능합니다.</dd>
+            </div>
+          </dl>
+        </div>
+      </section>
     </div>
   );
 }
